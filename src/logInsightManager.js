@@ -27,7 +27,7 @@ async function runLogInsightsQuery(logGroupNames, queryString, startTime, endTim
             throw new Error("Log Insights query failed.");
         }
     }
-    return queryResults;
+    return queryResults.map(result => result[0]);
 }
 
 module.exports = {

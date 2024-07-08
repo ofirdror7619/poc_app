@@ -15,9 +15,8 @@ app.use(bodyParser.json());
 app.get('/', async (req, res) => {
     const {query} = req;
     console.log(query)
-    const response = await main(query['alarmName'], query['region'], query['daysToSearch']);
+    const response = await main(query['alarmName'], query['region'], query['date']);
     res.json(response);
-    // res.send(query['agent'] + ' ' + query['region']);
 });
 
 

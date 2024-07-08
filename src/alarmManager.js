@@ -1,13 +1,23 @@
 const {CloudWatchClient, DescribeAlarmHistoryCommand} = require("@aws-sdk/client-cloudwatch");
+const minutesToLookBack = 5;
 
-async function getAlarmStateChangeTime(alarmName, daysToSearch = 1) {
+function createStartTimeEndTimeObject(breachTime) {
+    const startTime = new Date(breachTime - minutesToLookBack * 60 * 1000).getTime();
+    const endTime = new Date(breachTime).getTime();
+    return {startTime, endTime};
+}
+
+async function getAlarmStateChangeTime(alarmName, startDate) {
     const cloudwatchClient = new CloudWatchClient({region: 'us-west-2'});
     try {
+        if (isNaN(Date.parse(startDate))) {
+            throw new Error(`Invalid startDate: ${startDate}`);
+        }
         const command = new DescribeAlarmHistoryCommand({
             AlarmName: alarmName,
             HistoryItemType: 'StateUpdate',
-            StartDate: new Date(Date.now() - daysToSearch * 24 * 60 * 60 * 1000),
-            EndDate: new Date() // Now
+            StartDate: new Date(startDate), // Create a new Date object from the startDate string
+            EndDate: new Date()
         });
 
         const data = await cloudwatchClient.send(command);
@@ -19,7 +29,13 @@ async function getAlarmStateChangeTime(alarmName, daysToSearch = 1) {
                 breachTimes.add(new Date(event.Timestamp).getTime());
             }
         }
-        return Array.from(breachTimes).sort((a, b) => a - b);
+        console.log('breachTimes:', breachTimes);
+        const sortedBreachTimeList = Array.from(breachTimes).sort((a, b) => a - b);
+
+        return {
+            searchStartTime: createStartTimeEndTimeObject(sortedBreachTimeList[0]).startTime,
+            searchEndTime: createStartTimeEndTimeObject(sortedBreachTimeList[sortedBreachTimeList.length - 1]).endTime
+        }
     } catch (error) {
         console.error('Error:', error);
     }
