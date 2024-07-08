@@ -6,7 +6,7 @@ async function getAlarmStateChangeTime(alarmName) {
         const command = new DescribeAlarmHistoryCommand({
             AlarmName: alarmName,
             HistoryItemType: 'StateUpdate',
-            MaxRecords: 100
+            MaxRecords: 10
         });
 
         const data = await cloudwatchClient.send(command);
