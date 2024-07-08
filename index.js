@@ -5,14 +5,14 @@ const {searchErrorLogs} = require('./src/cloudWatchLogsManager');
 const alarmObjectsMap = require('./src/alarmsObject');
 const minutesToLookBack = 5;
 
-async function searchErrors(alarmName, region) {
+async function searchErrors(alarmName, region, daysToSearch) {
     const alarmObject = alarmObjectsMap[alarmName];
     alarmObject.alarmName = `${region}-${alarmName}`;
     const logGroupNames = alarmObject.logGroupNames.map(logGroupName => `/aws/lambda/${region}-${logGroupName}`);
     const queryString = alarmObject.query;
     let startTimeEndTimeSortedList = [];
     try {
-        const breachTimes = await getAlarmStateChangeTime(alarmObject.alarmName);
+        const breachTimes = await getAlarmStateChangeTime(alarmObject.alarmName, daysToSearch);
         console.log('Breach Times:', breachTimes);
 
         for (const breachTime of breachTimes) {

@@ -1,12 +1,13 @@
 const {CloudWatchClient, DescribeAlarmHistoryCommand} = require("@aws-sdk/client-cloudwatch");
 
-async function getAlarmStateChangeTime(alarmName) {
+async function getAlarmStateChangeTime(alarmName, daysToSearch = 1) {
     const cloudwatchClient = new CloudWatchClient({region: 'us-west-2'});
     try {
         const command = new DescribeAlarmHistoryCommand({
             AlarmName: alarmName,
             HistoryItemType: 'StateUpdate',
-            MaxRecords: 10
+            StartDate: new Date(Date.now() - daysToSearch * 24 * 60 * 60 * 1000),
+            EndDate: new Date() // Now
         });
 
         const data = await cloudwatchClient.send(command);
