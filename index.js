@@ -15,9 +15,12 @@ async function searchErrors(alarmName, region, daysToSearch) {
         let queryResults = await runLogInsightsQuery(logGroupNames, queryString, searchStartTime, searchEndTime);
         console.log(`Query Results for ${alarmName}:`, queryResults);
 
-        const result = alarmObject.createResult(queryResults);
+        const {title, values} = alarmObject.createResult(queryResults);
         return {
-            result: result
+            result: {
+                title,
+                values
+            }
         };
 
     } catch (error) {

@@ -5,7 +5,12 @@ metadataProducerWithoutMediaFiles = {
         "| parse \"[*]\" as Segment\n" +
         "| display Segment",
     logGroupNames: ['lambda-applink-metadata-producer'],
-    createResult: (queryResults) => queryResults.map(agentResolutionReason => agentResolutionReason.value.replace(/"/g, ''))
+    createResult: (queryResults) => {
+        return {
+            title: queryResults?.length > 0 ? queryResults[0].field : 'no results found',
+            values: queryResults.map(item => item.value.replace(/"/g, ''))
+        }
+    }
 }
 
 metadataProducerOsLoginNotFound = {
@@ -14,7 +19,12 @@ metadataProducerOsLoginNotFound = {
         "| parse @message 'the following agents: [*]' as agentIds\n" +
         "| display agentIds",
     logGroupNames: ['lambda-applink-metadata-producer'],
-    createResult: (queryResults) => {return Array.from(new Set(queryResults.map(obj => obj.value.toString().split(",")).flatMap(userIds => userIds)))}
+    createResult: (queryResults) => {
+        return {
+            title: queryResults?.length > 0 ? queryResults[0].field : 'no results found',
+            values: Array.from(new Set(queryResults.map(obj => obj.value.toString().split(",")).flatMap(userIds => userIds)))
+        }
+    }
 }
 
 const alarmObjectsMap = {
